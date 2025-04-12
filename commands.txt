@@ -1,0 +1,6 @@
+# Activate Virtual Environment
+cd D:\Projects\Hotel-Analytics-RAG
+venv\Scripts\activate
+
+# Install Required Libraries
+pip install requirements.txt
