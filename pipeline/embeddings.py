@@ -10,7 +10,8 @@ def generate_or_load_embeddings(texts, cache_path="D:\Projects\Hotel-Analytics-R
             return embeddings
 
     embedder = SentenceTransformer(model_name)
-    embeddings = embedder.encode(texts, show_progress_bar=True)
+    embeddings = embedder.encode(texts, show_progress_bar=True, batch_size=128)
+
 
     with open(cache_path, 'wb') as f:
         pickle.dump(embeddings, f)
