@@ -4,3 +4,9 @@ venv\Scripts\activate
 
 # Install Required Libraries
 pip install -r requirements.txt
+
+# Run Analytics Dashboard
+streamlit run analytics\dashboard.py
+
+# Build RAG
+python pipeline\main.py

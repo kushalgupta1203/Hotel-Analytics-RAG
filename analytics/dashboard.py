@@ -47,15 +47,15 @@ st.markdown('<div class="main-header">🏨 Hotel Analytics Dashboard</div>', uns
 st.sidebar.title("Navigation")
 page = st.sidebar.radio(
     "Select a Page",
-    ["Overview", "Revenue Analysis", "Cancellation Analysis", "Geographic Analysis", 
-     "Stay Patterns", "Customer Segmentation", "Advanced Insights"]
+    ["Overview", "Revenue Analysis", "Cancellation Analysis", "Geographic Analysis",
+     "Customer Segmentation", "Advanced Insights"]
 )
 
 # Data loading function
 @st.cache_data
 def load_data():
     # Update the path to where your data is stored
-    df = pd.read_csv("hotel_bookings_dataset.csv")
+    df = pd.read_csv("D:\Projects\Hotel-Analytics-RAG\dataset\hotel_bookings_dataset.csv")
     
     # Data preprocessing
     df['arrival_date'] = pd.to_datetime(df['arrival_date'])
@@ -270,29 +270,6 @@ if success_load:
                 plt.tight_layout()
                 st.pyplot(fig)
             
-            st.markdown('<div class="subsection-header">Revenue by Market Segment & Distribution Channel</div>', unsafe_allow_html=True)
-            segment_revenue = filtered_df.groupby(['market_segment', 'distribution_channel'])['revenue'].sum().reset_index()
-            
-            pivot_table = segment_revenue.pivot("market_segment", "distribution_channel", "revenue")
-            fig, ax = plt.subplots(figsize=(14, 6))
-            sns.heatmap(pivot_table, annot=True, fmt=".0f", cmap="Blues")
-            plt.title("Revenue by Market Segment & Distribution Channel")
-            plt.tight_layout()
-            st.pyplot(fig)
-            
-            st.markdown('<div class="subsection-header">Seasonal Revenue Analysis</div>', unsafe_allow_html=True)
-            seasonal_avg = filtered_df.groupby('arrival_month_name')['revenue'].mean().reindex([
-                'January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'
-            ])
-            
-            fig, ax = plt.subplots(figsize=(12, 5))
-            seasonal_avg.plot(kind='bar', color='skyblue', ax=ax)
-            plt.title("Average Revenue by Arrival Month")
-            plt.ylabel("Revenue (€)")
-            plt.xticks(rotation=45)
-            plt.tight_layout()
-            st.pyplot(fig)
             
         # ===== CANCELLATION ANALYSIS PAGE =====
         elif page == "Cancellation Analysis":
@@ -483,108 +460,6 @@ if success_load:
             
             st.plotly_chart(fig, use_container_width=True)
         
-        # ===== STAY PATTERNS PAGE =====
-        elif page == "Stay Patterns":
-            st.markdown('<div class="section-header">🛏️ Stay Patterns & Preferences</div>', unsafe_allow_html=True)
-            
-            # Metrics
-            avg_stay = filtered_df['total_nights'].mean()
-            col1, col2, col3 = st.columns(3)
-            
-            col1.metric("Average Stay Duration", f"{avg_stay:.2f} nights")
-            col2.metric("Average Weekend Nights", f"{filtered_df['stays_in_weekend_nights'].mean():.2f}")
-            col3.metric("Average Weekday Nights", f"{filtered_df['stays_in_week_nights'].mean():.2f}")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown('<div class="subsection-header">Stay Duration Distribution</div>', unsafe_allow_html=True)
-                fig, ax = plt.subplots(figsize=(10, 5))
-                sns.histplot(filtered_df['total_nights'], bins=20, kde=True, ax=ax)
-                plt.title("Stay Duration Distribution")
-                plt.xlabel("Total Nights")
-                plt.ylabel("Number of Bookings")
-                plt.tight_layout()
-                st.pyplot(fig)
-            
-            with col2:
-                st.markdown('<div class="subsection-header">Weekend vs Weekday Stay</div>', unsafe_allow_html=True)
-                df_melted = filtered_df.melt(id_vars='hotel', value_vars=['stays_in_weekend_nights', 'stays_in_week_nights'],
-                                   var_name='stay_type', value_name='nights')
-                
-                fig, ax = plt.subplots(figsize=(10, 5))
-                sns.boxplot(data=df_melted, x='stay_type', y='nights', ax=ax)
-                plt.title("Weekend vs Weekday Stay Duration")
-                plt.ylabel("Nights")
-                plt.xlabel("Stay Type")
-                plt.tight_layout()
-                st.pyplot(fig)
-            
-            st.markdown('<div class="subsection-header">Room Type Preferences</div>', unsafe_allow_html=True)
-            room_type_ct = pd.crosstab(filtered_df['reserved_room_type'], filtered_df['assigned_room_type'])
-            
-            fig, ax = plt.subplots(figsize=(12, 6))
-            sns.heatmap(room_type_ct, annot=True, fmt="d", cmap="Purples", ax=ax)
-            plt.title("Reserved vs Assigned Room Types")
-            plt.tight_layout()
-            st.pyplot(fig)
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown('<div class="subsection-header">Impact of Room Changes</div>', unsafe_allow_html=True)
-                room_change_stats = filtered_df.groupby('booking_changes')[['is_canceled', 'revenue']].mean().reset_index()
-                
-                fig, ax = plt.subplots(figsize=(10, 5))
-                plt.figure(figsize=(12, 5))
-                sns.lineplot(data=room_change_stats, x='booking_changes', y='is_canceled', label="Cancellation Rate")
-                sns.lineplot(data=room_change_stats, x='booking_changes', y='revenue', label="Average Revenue")
-                plt.title("Impact of Room Changes on Cancellation & Revenue")
-                plt.xlabel("Booking Changes")
-                plt.ylabel("Rate / Revenue")
-                plt.legend()
-                plt.tight_layout()
-                st.pyplot(fig)
-            
-            with col2:
-                st.markdown('<div class="subsection-header">Seasonal Booking Trends</div>', unsafe_allow_html=True)
-                monthly_bookings = filtered_df.groupby('arrival_month_name').size().reindex([
-                    'January', 'February', 'March', 'April', 'May', 'June',
-                    'July', 'August', 'September', 'October', 'November', 'December'
-                ])
-                
-                fig, ax = plt.subplots(figsize=(10, 5))
-                monthly_bookings.plot(kind='bar', color='teal', ax=ax)
-                plt.title("Bookings by Month")
-                plt.ylabel("Number of Bookings")
-                plt.xticks(rotation=45)
-                plt.tight_layout()
-                st.pyplot(fig)
-            
-            st.markdown('<div class="subsection-header">Waiting List Analysis</div>', unsafe_allow_html=True)
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                fig, ax = plt.subplots(figsize=(10, 5))
-                sns.histplot(filtered_df['days_in_waiting_list'], bins=20, kde=True, ax=ax)
-                plt.title("Days in Waiting List Distribution")
-                plt.xlabel("Days in Waiting List")
-                plt.ylabel("Count")
-                plt.tight_layout()
-                st.pyplot(fig)
-            
-            with col2:
-                waitlist_status = filtered_df.groupby('days_in_waiting_list')['is_canceled'].mean().reset_index()
-                waitlist_status = waitlist_status[waitlist_status['days_in_waiting_list'] <= 30]  # Limit to 30 days for better visualization
-                
-                fig, ax = plt.subplots(figsize=(10, 5))
-                sns.lineplot(data=waitlist_status, x='days_in_waiting_list', y='is_canceled', ax=ax)
-                plt.title("Waitlist Days vs Cancellation Rate")
-                plt.ylabel("Cancellation Rate")
-                plt.xlabel("Days in Waiting List")
-                plt.tight_layout()
-                st.pyplot(fig)
         
         # ===== CUSTOMER SEGMENTATION PAGE =====
         elif page == "Customer Segmentation":
