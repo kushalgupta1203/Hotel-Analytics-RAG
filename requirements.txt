@@ -11,4 +11,7 @@ faiss-cpu
 transformers
 accelerate
 torch
+torchvision
+torchaudio
 tqdm
+huggingface_hub

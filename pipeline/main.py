@@ -10,7 +10,7 @@ from sentence_transformers import SentenceTransformer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # === Load Dataset ===
-csv_path = r"D:/Projects/Hotel-Analytics-RAG/dataset/hotel_bookings_dataset.csv"
+csv_path = r"D:\Projects\Hotel-Analytics-RAG\dataset\hotel_bookings_dataset.csv"
 df = pd.read_csv(csv_path)
 
 # === Prepare Text Data ===
@@ -27,9 +27,9 @@ tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
 llama_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", device_map="auto")
 llama_pipeline = pipeline("text-generation", model=llama_model, tokenizer=tokenizer)
 
+embedder = SentenceTransformer("all-MiniLM-L6-v2")
 # === Ask Question Functionality ===
 def ask_question(query, max_tokens=200):
-    embedder = SentenceTransformer("all-MiniLM-L6-v2")
     query_embedding = embedder.encode([query])
     
     context = "\n".join(retrieve_faiss(query_embedding, faiss_index, texts))
@@ -45,3 +45,6 @@ if __name__ == "__main__":
     answer = ask_question(query)
     
     print("\nAnswer:\n", answer)
+
+# Regularly clear GPU cache
+torch.cuda.empty_cache()
