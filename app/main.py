@@ -20,7 +20,7 @@ pipeline_dir = os.path.join(project_root, 'pipeline')
 if pipeline_dir not in sys.path:
     sys.path.insert(0, pipeline_dir)
 if project_root not in sys.path:
-     sys.path.insert(0, project_root)
+    sys.path.insert(0, project_root)
 
 # --- Import Custom Modules AFTER path setup ---
 # (Keep your existing imports)
@@ -52,114 +52,30 @@ FORCE_RECOMPUTE_ANALYTICS = os.getenv("FORCE_RECOMPUTE_ANALYTICS", "false").lowe
 FORCE_RECOMPUTE_EMBEDDINGS = os.getenv("FORCE_RECOMPUTE_EMBEDDINGS", "false").lower() == "true"
 FORCE_RECREATE_INDEX = os.getenv("FORCE_RECREATE_INDEX", "false").lower() == "true"
 
-# --- Lifespan Context Manager (EDITED DATA LOADING) ---
+# --- Lifespan Context Manager (REVISED) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup - Load models, data, precompute analytics
     print("--- Starting Application Lifespan ---")
     start_time = time.time()
 
-    # 1. Load Dataset and Clean Problematic Columns
-    print(f"Loading dataset from {CSV_PATH}...")
-    try:
-        # Specify low_memory=False if you have mixed types, might help sometimes
-        df = pd.read_csv(CSV_PATH, low_memory=False)
-        print(f"Dataset loaded initially: {len(df)} rows.")
+    # --- Assume data loading and analytics are handled elsewhere ---
+    print("Assuming data has been loaded, cleaned, and analytics precomputed.")
 
-        # --- Revised Cleaning for 'children', 'agent', 'company' ---
-        cols_to_clean_as_int = ['children', 'agent', 'company']
-        for col in cols_to_clean_as_int:
-            if col in df.columns:
-                print(f"Cleaning column: {col}")
-                # Step 1: Convert to numeric. Errors (like 'unknown') become NaN.
-                df[col] = pd.to_numeric(df[col], errors='coerce')
-                # Step 2: Fill ALL NaN values (original NaNs AND coerced errors) with 0.
-                df[col].fillna(0, inplace=True)
-                # Step 3: Now safely convert the column to integer type.
-                df[col] = df[col].astype(int)
-                print(f"Column '{col}' cleaned and converted to int.")
-            else:
-                print(f"Warning: Column '{col}' not found in dataset during cleaning.")
-
-        # Handle other NaNs that should be strings or specific values
-        df.fillna({'country': 'Unknown'}, inplace=True) # Handle country NaN separately
-        # Add other specific fillna calls if needed for other columns (e.g., meal)
-        df.fillna({'meal': 'Undefined/SC'}, inplace=True) # Example for meal
-
-        print(f"Dataset cleaned. Final rows: {len(df)} rows.")
-
-    except FileNotFoundError:
-        print(f"FATAL Error: Dataset file not found at {CSV_PATH}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"FATAL Error loading or cleaning dataset: {e}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
-
-    # Calculate composite columns if needed (AFTER cleaning)
-    print("Calculating composite columns (total_nights, revenue)...")
-    # Total Nights
-    if 'stays_in_weekend_nights' in df.columns and 'stays_in_week_nights' in df.columns:
-        # Ensure component columns are numeric and fill NaNs before summing
-        weekend_nights = pd.to_numeric(df['stays_in_weekend_nights'], errors='coerce').fillna(0)
-        week_nights = pd.to_numeric(df['stays_in_week_nights'], errors='coerce').fillna(0)
-        df['total_nights'] = (weekend_nights + week_nights).astype(int)
-        print("'total_nights' calculated.")
-    else:
-        print("Warning: Cannot calculate 'total_nights', required columns missing.")
-        # Handle case where total_nights might be needed later - maybe add a default column?
-        if 'total_nights' not in df.columns: df['total_nights'] = 0
-
-
-    # Revenue
-    if 'adr' in df.columns and 'total_nights' in df.columns:
-         # Ensure adr is numeric before multiplication, handle potential NaNs
-        df['adr'] = pd.to_numeric(df['adr'], errors='coerce').fillna(0.0)
-        # Ensure total_nights exists and is numeric (should be from above)
-        df['revenue'] = df['adr'] * df['total_nights']
-        print("'revenue' calculated.")
-    else:
-        print("Warning: Cannot calculate 'revenue', required columns 'adr' or 'total_nights' missing/not calculable.")
-        if 'revenue' not in df.columns: df['revenue'] = 0.0 # Add default if missing
-
-    # --- Continue with rest of the lifespan setup ---
-
-    # 2. Precompute and Store Analytics
-    print("Checking analytics precomputation...")
-    # (Rest of your existing lifespan code: generate_and_store_analytics call, text generation, embedding, FAISS, model loading)
-    # Make sure generate_and_store_analytics uses the cleaned df
-    if FORCE_RECOMPUTE_ANALYTICS or not os.path.exists(DB_PATH):
-        print("Generating and storing analytics in DB...")
-        try:
-            generate_and_store_analytics(df.copy(), DB_PATH) # Use the cleaned df
-        except Exception as e:
-            print(f"Error during analytics generation: {e}")
-            # sys.exit(1) # Decide if critical
-    else:
-        print("Analytics DB exists. Skipping generation.")
-
-    # 3. Generate Text Representations
-    print("Generating text representations for RAG...")
-    try:
-        texts = df.apply(row_to_text, axis=1).tolist()
-        app.state.texts = texts # Store in app.state
-        print(f"Generated {len(texts)} text representations.")
-    except Exception as e:
-        print(f"FATAL error generating texts: {e}")
-        sys.exit(1)
-
-
-    # 4. Generate or Load Embeddings
+    # 3. Generate or Load Embeddings
     print("Generating/Loading embeddings...")
     try:
+        df = pd.read_csv(CSV_PATH, low_memory=False) # Load data if texts depend on it
+        texts = df.apply(row_to_text, axis=1).tolist()
+        app.state.texts = texts # Store in app.state
+        del df # Clean up
         embeddings = generate_or_load_embeddings(texts, force_recompute=FORCE_RECOMPUTE_EMBEDDINGS)
         print(f"Embeddings ready. Shape: {embeddings.shape}")
     except Exception as e:
         print(f"FATAL Error loading/generating embeddings: {e}")
         sys.exit(1)
 
-    # 5. Create or Load FAISS Index
+    # 4. Create or Load FAISS Index
     print("Creating/Loading FAISS index...")
     try:
         faiss_index = create_or_load_faiss_index(embeddings, force_recreate=FORCE_RECREATE_INDEX)
@@ -170,7 +86,7 @@ async def lifespan(app: FastAPI):
         print(f"FATAL Error loading/creating FAISS index: {e}")
         sys.exit(1)
 
-    # 6. Load Models
+    # 5. Load Models
     print("Loading models...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
@@ -195,7 +111,6 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"FATAL Error loading models: {e}")
         sys.exit(1)
-
 
     end_time = time.time()
     print(f"--- Application Startup Complete ({end_time - start_time:.2f} seconds) ---")
@@ -237,7 +152,7 @@ async def ask_api(q: Query, request: Request):
     state = request.app.state
     print(f"App State in /ask: {state._state.keys()}") # CORRECTED PRINT STATEMENT
     if not state or not hasattr(state, "llama_pipeline") or state.llama_pipeline is None: # Check if attribute exists
-         raise HTTPException(status_code=503, detail="Resources not initialized yet. Please wait and retry.")
+        raise HTTPException(status_code=503, detail="Resources not initialized yet. Please wait and retry.")
 
     question = q.question
     print(f"Received question: {question}")
@@ -270,7 +185,7 @@ async def get_analytics_api(request: Request):
     state = request.app.state
     print(f"App State in /analytics: {state._state.keys()}") # CORRECTED PRINT STATEMENT
     if not state or not hasattr(state, "db_path") or state.db_path is None:
-         raise HTTPException(status_code=503, detail="Resources not initialized yet or DB path missing.")
+        raise HTTPException(status_code=503, detail="Resources not initialized yet or DB path missing.")
 
     print("Fetching analytics data...")
     db_path = state.db_path
