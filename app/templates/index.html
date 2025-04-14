@@ -6,50 +6,74 @@
     <title>Hotel Analytics Chatbot</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        /* Paste the CSS from your original index.html here */
         body {
             font-family: 'Open Sans', sans-serif;
             background-color: #f4f7fb;
             margin: 0;
             padding: 0;
+            padding-bottom: 80px; /* Add padding for footer */
         }
 
         header {
             background-color: #1e2a38;
             color: white;
-            padding: 20px;
+            padding: 15px 20px; /* Reduced padding */
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         header h1 {
             margin: 0;
-            font-size: 2.5em;
+            font-size: 2em; /* Adjusted size */
             font-weight: 500;
+        }
+         header p {
+            margin: 5px 0 0 0;
+            font-size: 0.9em;
+            color: #ccc;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 30px;
+            max-width: 800px; /* Adjusted max-width */
+            margin: 30px auto; /* Reduced margin */
+            padding: 20px; /* Reduced padding */
             background-color: #fff;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+            border-radius: 8px; /* Slightly reduced radius */
         }
 
         .form-container {
             display: flex;
-            flex-direction: column;
-            gap: 20px;
+            flex-direction: column; /* Stack elements vertically */
+            gap: 10px; /* Reduced gap */
+            align-items: stretch; /* Make items fill width */
         }
+
+        .input-button-row { /* New style for horizontal layout */
+             display: flex;
+             gap: 10px;
+             align-items: center; /* Align items vertically */
+        }
+
+         .input-button-row textarea {
+            flex-grow: 1; /* Allow textarea to take available space */
+         }
 
         .form-container input,
         .form-container textarea,
         .form-container button {
-            padding: 12px 18px;
-            font-size: 1rem;
-            border-radius: 8px;
+            padding: 10px 15px; /* Reduced padding */
+            font-size: 0.95rem; /* Adjusted font size */
+            border-radius: 6px; /* Slightly reduced radius */
             border: 1px solid #ddd;
-            width: 100%;
+            box-sizing: border-box; /* Include padding/border in width */
         }
+
+         .form-container textarea {
+            resize: vertical; /* Allow vertical resize only */
+            min-height: 60px; /* Set a min height */
+         }
 
         .form-container button {
             background-color: #1e2a38;
@@ -57,6 +81,7 @@
             border: none;
             cursor: pointer;
             transition: background-color 0.3s;
+            flex-shrink: 0; /* Prevent button from shrinking */
         }
 
         .form-container button:hover {
@@ -64,34 +89,42 @@
         }
 
         .form-section {
-            margin-bottom: 40px;
+            margin-bottom: 30px; /* Reduced margin */
         }
 
         .form-section h2 {
-            font-size: 1.5em;
+            font-size: 1.3em; /* Adjusted size */
             color: #333;
-            margin-bottom: 15px;
+            margin-bottom: 10px; /* Reduced margin */
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
         }
 
         .response-box {
-            background-color: #f4f7fb;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            min-height: 200px;
-            font-size: 1.1rem;
+            background-color: #f8f9fa; /* Slightly lighter background */
+            padding: 15px; /* Reduced padding */
+            border-radius: 6px;
+            border: 1px solid #e0e0e0; /* Lighter border */
+            min-height: 100px; /* Reduced min-height */
+            font-size: 1rem; /* Adjusted font size */
             color: #333;
             box-sizing: border-box;
+            white-space: pre-wrap; /* Preserve whitespace and wrap text */
+            word-wrap: break-word; /* Ensure long words break */
+            margin-top: 15px;
+            overflow-y: auto; /* Add scroll if content overflows */
+            max-height: 300px; /* Limit max height */
         }
 
         footer {
             background-color: #1e2a38;
-            color: white;
+            color: #ccc; /* Lighter text */
             text-align: center;
-            padding: 15px;
+            padding: 10px; /* Reduced padding */
             position: fixed;
             bottom: 0;
             width: 100%;
+            font-size: 0.85em; /* Smaller font */
         }
 
         footer p {
@@ -99,22 +132,41 @@
         }
 
         .sample-queries {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e9f1f7;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 1.1rem;
+             margin-top: 15px;
+             padding: 10px 15px;
+             background-color: #eef3f8;
+             border-radius: 6px;
+             border: 1px solid #d6e0eb;
+             font-size: 0.9em;
+        }
+        .sample-queries h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            color: #333;
         }
 
         .sample-queries ul {
-            padding-left: 20px;
-            list-style-type: none;
+             padding-left: 0;
+             list-style-type: none;
+             margin: 0;
         }
 
         .sample-queries li {
-            padding: 5px 0;
+             padding: 3px 0;
+             color: #555;
+             cursor: pointer; /* Make samples clickable */
+             transition: color 0.2s;
         }
+        .sample-queries li:hover {
+            color: #1e2a38;
+            font-weight: 600;
+        }
+         /* Styling for loading text */
+         .loading {
+            color: #888;
+            font-style: italic;
+         }
 
     </style>
 </head>
@@ -122,101 +174,173 @@
 
 <header>
     <h1>Hotel Analytics Chatbot</h1>
-    <p>Get insights and analytics for your hotel bookings.</p>
+    <p>Ask questions or get analytical reports on hotel booking data.</p>
 </header>
 
 <div class="container">
 
-    <!-- Ask Question Section -->
     <div class="form-section">
         <h2>Ask Your Question</h2>
         <div class="form-container">
-            <textarea id="question" rows="4" placeholder="Ask your booking-related question here..."></textarea>
-            <button onclick="askQuestion()">Get Answer</button>
+            <div class="input-button-row">
+                <textarea id="question" rows="3" placeholder="E.g., 'What is the average ADR?', 'Tell me about bookings from France'"></textarea>
+                <button onclick="askQuestion()">Get Answer</button>
+            </div>
         </div>
+         <div class="sample-queries">
+             <h3>Try these samples:</h3>
+             <ul id="sample-list">
+                 </ul>
+         </div>
         <div class="response-box" id="answer-box">
-            <!-- Answer will be displayed here -->
-            Please ask a question to get an answer.
-        </div>
-
-        <!-- Sample Queries -->
-        <div class="sample-queries">
-            <h3>Sample Queries</h3>
-            <ul>
-                <li>Show me total revenue for July 2017.</li>
-                <li>Which locations had the highest booking cancellations?</li>
-                <li>What is the average price of a hotel booking?</li>
-            </ul>
+             Your answer will appear here.
         </div>
     </div>
 
-    <!-- Analytics Section -->
     <div class="form-section">
         <h2>Get Analytics Report</h2>
         <div class="form-container">
-            <button onclick="getAnalytics()">Get Analytics</button>
+            <button onclick="getAnalytics()">Fetch Analytics Summary</button>
         </div>
         <div class="response-box" id="analytics-box">
-            <!-- Analytics data will be displayed here -->
-            Please click "Get Analytics" to see the trends and insights.
+             Click the button above to load key analytics.
         </div>
     </div>
 
 </div>
 
 <footer>
-    <p>&copy; 2025 Hotel Analytics Chatbot. All rights reserved.</p>
+    <p>&copy; 2025 Hotel Analytics Chatbot</p>
 </footer>
 
 <script>
+    // Sample queries list
+    const sampleQueries = [
+        "What was the total revenue for July 2017?",
+        "Which country had the highest booking cancellations?",
+        "What is the average ADR?",
+        "Which date had the most cancellations?",
+        "How many cancellations were on 2015-07-06?",
+        "Which country made the most bookings?",
+        "Tell me about bookings from Portugal (PRT).",
+        "Were there any bookings with babies from Great Britain?",
+        "What are the different meal types offered?"
+    ];
+
+    // Populate sample queries and make them clickable
+    const sampleList = document.getElementById('sample-list');
+    sampleQueries.forEach(q => {
+        const li = document.createElement('li');
+        li.textContent = q;
+        li.onclick = () => {
+            document.getElementById('question').value = q;
+            askQuestion(); // Optionally ask immediately on click
+        };
+        sampleList.appendChild(li);
+    });
+
+
     async function askQuestion() {
-        const question = document.getElementById("question").value;
+        const questionInput = document.getElementById("question");
+        const question = questionInput.value;
         if (!question.trim()) {
             alert("Please enter a question!");
             return;
         }
 
         const responseBox = document.getElementById("answer-box");
-        responseBox.textContent = "Loading...";
+        responseBox.innerHTML = '<span class="loading">Thinking...</span>'; // Use innerHTML for styling
 
-        const response = await fetch('/ask', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ question: question })
-        });
+        try {
+            const response = await fetch('/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: question })
+            });
 
-        const data = await response.json();
-        responseBox.textContent = data.answer || "Sorry, I couldn't find an answer.";
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            // Display answer, replace newline characters with <br> for HTML display
+            responseBox.innerHTML = data.answer ? data.answer.replace(/\n/g, '<br>') : "Sorry, I couldn't find an answer.";
+
+        } catch (error) {
+            console.error('Error asking question:', error);
+            responseBox.textContent = `Error: ${error.message}`;
+        }
     }
 
     async function getAnalytics() {
         const analyticsBox = document.getElementById("analytics-box");
-        analyticsBox.textContent = "Loading analytics...";
+        analyticsBox.innerHTML = '<span class="loading">Loading analytics...</span>'; // Use innerHTML
 
-        const response = await fetch('/analytics', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
+        try {
+            const response = await fetch('/analytics', {
+                method: 'POST', // Changed to POST if preferred, or keep GET if no body needed
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+             if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
             }
-        });
 
-        const data = await response.json();
-        let analyticsContent = "<h3>Revenue Trends:</h3><ul>";
+            const data = await response.json();
+            let analyticsContent = `<h4>Key Analytics Summary:</h4>`;
 
-        data.revenue_trends.forEach(item => {
-            analyticsContent += `<li>Month: ${item.month} ${item.year}, Revenue: ${item.revenue}</li>`;
-        });
+            // Display Average ADR
+            analyticsContent += `<p><strong>Overall Average ADR:</strong> ${data.average_adr || 'N/A'}</p>`;
 
-        analyticsContent += "</ul><h3>Top Cancellation Locations:</h3><ul>";
-        data.top_cancellation_locations.forEach(item => {
-            analyticsContent += `<li>${item.location}: ${item.cancellations} cancellations</li>`;
-        });
+             // Display Top Booking Countries
+            if (data.top_booking_countries && data.top_booking_countries.length > 0) {
+                analyticsContent += `<strong>Top Booking Countries:</strong><ul>`;
+                data.top_booking_countries.forEach(item => {
+                    analyticsContent += `<li>${item.country}: ${item.count} bookings</li>`;
+                });
+                analyticsContent += "</ul>";
+            }
 
-        analyticsContent += "</ul>";
+            // Display Top Cancellation Locations
+            if (data.top_cancellation_locations && data.top_cancellation_locations.length > 0) {
+                analyticsContent += `<strong>Top Cancellation Locations:</strong><ul>`;
+                data.top_cancellation_locations.forEach(item => {
+                    analyticsContent += `<li>${item.location}: ${item.cancellations} cancellations</li>`;
+                });
+                analyticsContent += "</ul>";
+            }
 
-        analyticsBox.innerHTML = analyticsContent;
+             // Display Top Cancellation Dates
+             if (data.top_cancellation_dates && data.top_cancellation_dates.length > 0) {
+                analyticsContent += `<strong>Top Cancellation Dates:</strong><ul>`;
+                data.top_cancellation_dates.forEach(item => {
+                    analyticsContent += `<li>${item.date}: ${item.count} cancellations</li>`;
+                });
+                analyticsContent += "</ul>";
+            }
+
+            // Display Revenue Trends (optional - might be long)
+            // if (data.revenue_trends && data.revenue_trends.length > 0) {
+            //     analyticsContent += `<strong>Revenue Trends (Sample):</strong><ul>`;
+            //     // Display only first few or last few for brevity
+            //     const trendsToShow = data.revenue_trends.slice(-12); // Show last 12 months
+            //     trendsToShow.forEach(item => {
+            //         analyticsContent += `<li>${item.month} ${item.year}: ${item.revenue}</li>`;
+            //     });
+            //      if (data.revenue_trends.length > trendsToShow.length) {
+            //         analyticsContent += `<li>... (${data.revenue_trends.length} total entries)</li>`;
+            //     }
+            //     analyticsContent += "</ul>";
+            // }
+
+            analyticsBox.innerHTML = analyticsContent;
+
+        } catch (error) {
+             console.error('Error getting analytics:', error);
+            analyticsBox.textContent = `Error fetching analytics: ${error.message}`;
+        }
     }
 </script>
 

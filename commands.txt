@@ -8,8 +8,8 @@ pip install -r requirements.txt
 # Run Analytics Dashboard
 streamlit run analytics\dashboard.py
 
-# Build RAG
+# Build RAG Aplication
 python pipeline\main.py
 
-# Run RAG
+# Run RAG Application
 uvicorn app.main:app --reload
