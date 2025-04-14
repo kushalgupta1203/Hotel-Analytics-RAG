@@ -17,6 +17,11 @@ Hotel Analytics RAG is a powerful analytical platform and Q&A system that transf
 - **Hugging Face account with access to LLaMA 2 (7B Chat)** - You must accept the model terms at [LLaMA 2 Model Card](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf)
 - CUDA configured for GPU acceleration
 
+## 📷 Images
+https://github.com/kushalgupta1203/Hotel-Analytics-RAG/blob/main/evaluation/outcomes/API-call-time.png
+https://github.com/kushalgupta1203/Hotel-Analytics-RAG/blob/main/evaluation/outcomes/RAG-application.png
+https://github.com/kushalgupta1203/Hotel-Analytics-RAG/blob/main/evaluation/outcomes/dashboard.png
+
 ## ⚙️ Setup Instructions
 
 1. **Clone the repository**
