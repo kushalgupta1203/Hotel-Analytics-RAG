@@ -18,9 +18,16 @@ Hotel Analytics RAG is a powerful analytical platform and Q&A system that transf
 - CUDA configured for GPU acceleration
 
 ## 📷 Images
-https://github.com/kushalgupta1203/Hotel-Analytics-RAG/blob/main/evaluation/outcomes/API-call-time.png
-https://github.com/kushalgupta1203/Hotel-Analytics-RAG/blob/main/evaluation/outcomes/RAG-application.png
-https://github.com/kushalgupta1203/Hotel-Analytics-RAG/blob/main/evaluation/outcomes/dashboard.png
+
+### 📌 API Call Time
+![API Call Time](https://raw.githubusercontent.com/kushalgupta1203/Hotel-Analytics-RAG/main/evaluation/outcomes/API-call-time.png)
+
+### 🧠 RAG Application
+![RAG Application](https://raw.githubusercontent.com/kushalgupta1203/Hotel-Analytics-RAG/main/evaluation/outcomes/RAG-application.png)
+
+### 📊 Dashboard
+![Dashboard](https://raw.githubusercontent.com/kushalgupta1203/Hotel-Analytics-RAG/main/evaluation/outcomes/dashboard.png)
+
 
 ## ⚙️ Setup Instructions
 
