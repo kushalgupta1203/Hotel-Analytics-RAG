@@ -45,7 +45,7 @@ def row_to_text(row):
         f"Revenue: {safe(row['revenue'])}."
     )
 
-def get_db_connection(db_path="D:/Projects/Hotel-Analytics-RAG/analytics.db"):
+def get_db_connection(db_path=r"D:/Projects/Hotel-Analytics-RAG/dataset/analytics.db"):
     conn = sqlite3.connect(db_path)
     return conn
 

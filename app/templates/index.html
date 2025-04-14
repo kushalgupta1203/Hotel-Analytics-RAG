@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Analytics Chatbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f4f7fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #1e2a38;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-container input,
+        .form-container textarea,
+        .form-container button {
+            padding: 12px 18px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            width: 100%;
+        }
+
+        .form-container button {
+            background-color: #1e2a38;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .form-container button:hover {
+            background-color: #3c4a61;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .form-section h2 {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .response-box {
+            background-color: #f4f7fb;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            min-height: 200px;
+            font-size: 1.1rem;
+            color: #333;
+            box-sizing: border-box;
+        }
+
+        footer {
+            background-color: #1e2a38;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        .sample-queries {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9f1f7;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1.1rem;
+        }
+
+        .sample-queries ul {
+            padding-left: 20px;
+            list-style-type: none;
+        }
+
+        .sample-queries li {
+            padding: 5px 0;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Hotel Analytics Chatbot</h1>
+    <p>Get insights and analytics for your hotel bookings.</p>
+</header>
+
+<div class="container">
+
+    <!-- Ask Question Section -->
+    <div class="form-section">
+        <h2>Ask Your Question</h2>
+        <div class="form-container">
+            <textarea id="question" rows="4" placeholder="Ask your booking-related question here..."></textarea>
+            <button onclick="askQuestion()">Get Answer</button>
+        </div>
+        <div class="response-box" id="answer-box">
+            <!-- Answer will be displayed here -->
+            Please ask a question to get an answer.
+        </div>
+
+        <!-- Sample Queries -->
+        <div class="sample-queries">
+            <h3>Sample Queries</h3>
+            <ul>
+                <li>Show me total revenue for July 2017.</li>
+                <li>Which locations had the highest booking cancellations?</li>
+                <li>What is the average price of a hotel booking?</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div class="form-section">
+        <h2>Get Analytics Report</h2>
+        <div class="form-container">
+            <button onclick="getAnalytics()">Get Analytics</button>
+        </div>
+        <div class="response-box" id="analytics-box">
+            <!-- Analytics data will be displayed here -->
+            Please click "Get Analytics" to see the trends and insights.
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <p>&copy; 2025 Hotel Analytics Chatbot. All rights reserved.</p>
+</footer>
+
+<script>
+    async function askQuestion() {
+        const question = document.getElementById("question").value;
+        if (!question.trim()) {
+            alert("Please enter a question!");
+            return;
+        }
+
+        const responseBox = document.getElementById("answer-box");
+        responseBox.textContent = "Loading...";
+
+        const response = await fetch('/ask', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ question: question })
+        });
+
+        const data = await response.json();
+        responseBox.textContent = data.answer || "Sorry, I couldn't find an answer.";
+    }
+
+    async function getAnalytics() {
+        const analyticsBox = document.getElementById("analytics-box");
+        analyticsBox.textContent = "Loading analytics...";
+
+        const response = await fetch('/analytics', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        let analyticsContent = "<h3>Revenue Trends:</h3><ul>";
+
+        data.revenue_trends.forEach(item => {
+            analyticsContent += `<li>Month: ${item.month} ${item.year}, Revenue: ${item.revenue}</li>`;
+        });
+
+        analyticsContent += "</ul><h3>Top Cancellation Locations:</h3><ul>";
+        data.top_cancellation_locations.forEach(item => {
+            analyticsContent += `<li>${item.location}: ${item.cancellations} cancellations</li>`;
+        });
+
+        analyticsContent += "</ul>";
+
+        analyticsBox.innerHTML = analyticsContent;
+    }
+</script>
+
+</body>
+</html>

@@ -1,48 +1,61 @@
 import sqlite3
 import pandas as pd
 
-# Aggregate and store precomputed insights
+def get_db_connection():
+    return sqlite3.connect(r"D:\Projects\Hotel-Analytics-RAG\dataset\analytics.db")
+
+def fetch_all_results(cursor, query):
+    cursor.execute(query)
+    return cursor.fetchall()
 
 def store_revenue_insights(df):
-    df['arrival_date'] = pd.to_datetime(df['arrival_date'])
-    df['month'] = df['arrival_date'].dt.month_name()
-    df['year'] = df['arrival_date'].dt.year
-    monthly_revenue = df.groupby(['month', 'year'])['revenue'].sum().reset_index()
+    df["arrival_month"] = df["arrival_date_month"]
+    df["arrival_year"] = df["arrival_date_year"]
+    df["revenue"] = df["adr"] * df["total_nights"]
 
-    conn = sqlite3.connect("D:/Projects/Hotel-Analytics-RAG/analytics.db")
+    grouped = df.groupby(["arrival_month", "arrival_year"])["revenue"].sum().reset_index()
+    grouped.columns = ["month", "year", "revenue"]
+
+    conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS revenue_insights (month TEXT, year INTEGER, revenue REAL)")
+    cursor.execute("DELETE FROM revenue_insights")
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS revenue_insights (
-            month TEXT,
-            year INTEGER,
-            revenue REAL
-        )
-    """)
-
-    for _, row in monthly_revenue.iterrows():
+    for _, row in grouped.iterrows():
         cursor.execute("INSERT INTO revenue_insights (month, year, revenue) VALUES (?, ?, ?)",
-                       (row['month'], row['year'], row['revenue']))
-
+                       (row["month"], row["year"], row["revenue"]))
     conn.commit()
     conn.close()
 
 def store_cancellation_insights(df):
-    location_cancellations = df.groupby('country')['is_canceled'].sum().reset_index()
+    grouped = df[df["is_canceled"] == 1].groupby("country").size().reset_index(name="cancellations")
+    grouped.columns = ["location", "cancellations"]
 
-    conn = sqlite3.connect("D:/Projects/Hotel-Analytics-RAG/analytics.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS cancellation_insights (location TEXT, cancellations INTEGER)")
+    cursor.execute("DELETE FROM cancellation_insights")
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS cancellation_insights (
-            location TEXT,
-            cancellations INTEGER
-        )
-    """)
-
-    for _, row in location_cancellations.iterrows():
+    for _, row in grouped.iterrows():
         cursor.execute("INSERT INTO cancellation_insights (location, cancellations) VALUES (?, ?)",
-                       (row['country'], row['is_canceled']))
-
+                       (row["location"], row["cancellations"]))
     conn.commit()
     conn.close()
+
+def store_non_mathematical_insights(df):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS cancellation_by_date (date TEXT, count INTEGER)")
+    cursor.execute("DELETE FROM cancellation_by_date")
+
+    canceled_by_date = df[df["is_canceled"] == 1].groupby("reservation_status_date").size().reset_index(name="count")
+    for _, row in canceled_by_date.iterrows():
+        cursor.execute("INSERT INTO cancellation_by_date (date, count) VALUES (?, ?)",
+                       (row["reservation_status_date"], row["count"]))
+    conn.commit()
+    conn.close()
+
+def generate_and_store_analytics(df):
+    store_revenue_insights(df)
+    store_cancellation_insights(df)
+    store_non_mathematical_insights(df)
