@@ -10,3 +10,7 @@ streamlit run analytics\dashboard.py
 
 # Build RAG
 python pipeline\main.py
+
+# Run RAG
+uvicorn pipeline.main:app --reload
+uvicorn app.main:app --reload

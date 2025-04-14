@@ -1,9 +1,9 @@
 import pandas as pd
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
-from utils import row_to_text
-from embeddings import generate_or_load_embeddings
-from faiss_index import create_or_load_faiss_index, retrieve_faiss
+from pipeline.utils import row_to_text
+from pipeline.embeddings import generate_or_load_embeddings
+from pipeline.faiss_index import create_or_load_faiss_index, retrieve_faiss
 from sentence_transformers import SentenceTransformer
 
 # Ensure GPU is used if available

@@ -21,7 +21,7 @@ faiss_index = faiss.read_index(faiss_index_path)
 # Load LLaMA model for question answering
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
 llama_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", device_map="auto")
-llama_pipeline = pipeline("text-generation", model=llama_model, tokenizer=tokenizer, device=0)
+llama_pipeline = pipeline("text-generation", model=llama_model, tokenizer=tokenizer)
 
 # SentenceTransformer for query embeddings
 embedder = SentenceTransformer("all-MiniLM-L6-v2", device=device)
