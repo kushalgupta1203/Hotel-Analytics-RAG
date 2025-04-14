@@ -6,10 +6,9 @@ venv/
 
 # Python cache
 **/__pycache__/
-**/*.pyc
+**/*.py*
 
 # Project-specific files
-req-doc.pdf
 pipeline/embeddings.pkl
 pipeline/hotel_faiss.index
 
