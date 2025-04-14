@@ -161,7 +161,7 @@ Hotel-Analytics-RAG/
   - Created HTML frontend for easy user interaction
 
 ### 5️⃣ Performance Evaluation
-- **Accuracy Assessment**:
+- **Accuracy Assessment (Check detailed explaination in folder - evaluation/)**:
   - Manually validated responses against known dataset values
   - Created test suite with expected answers for key analytical questions
 - **Performance Optimization**:

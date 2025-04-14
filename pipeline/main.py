@@ -41,7 +41,7 @@ except ImportError as e:
 # Define paths (consider using a config file or args for more robustness)
 # Using DEFAULT_DB_PATH from utils
 DB_PATH = DEFAULT_DB_PATH
-CSV_PATH = r"D:\Projects\Hotel-Analytics-RAG\dataset\hotel_bookings_dataset.csv" 
+CSV_PATH = r"D:\Projects\Hotel-Analytics-RAG\dataset\hotel_bookings_dataset.csv"
 
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 LLM_MODEL = "meta-llama/Llama-2-7b-chat-hf" # Make sure you have access/downloaded this
@@ -88,6 +88,18 @@ def initialize_system(csv_path, db_path, embedding_model_name, llm_model_name, f
         traceback.print_exc()
         sys.exit(1)
 
+    # === Store DataFrame in SQLite (for SQL-based analytics) ===
+    print(f"Storing the cleaned DataFrame into SQLite table 'hotel_bookings' at {db_path}...")
+    try:
+        conn = get_db_connection(db_path)
+        df.to_sql('hotel_bookings', conn, if_exists='replace', index=False) # 'replace' will drop and recreate the table
+        conn.close()
+        print("DataFrame stored in SQLite successfully.")
+    except Exception as e:
+        print(f"FATAL Error storing DataFrame to SQLite: {e}")
+        traceback.print_exc()
+        sys.exit(1)
+
     # === Calculate composite columns (AFTER cleaning) ===
     print("Calculating composite columns (total_nights, revenue)...")
     # Total Nights
@@ -103,7 +115,7 @@ def initialize_system(csv_path, db_path, embedding_model_name, llm_model_name, f
 
     # Revenue
     if 'adr' in df.columns and 'total_nights' in df.columns:
-         # Ensure adr is numeric before multiplication, handle potential NaNs
+        # Ensure adr is numeric before multiplication, handle potential NaNs
         df['adr'] = pd.to_numeric(df['adr'], errors='coerce').fillna(0.0)
         # Ensure total_nights exists and is numeric (should be from above)
         df['revenue'] = df['adr'] * df['total_nights']
@@ -241,7 +253,7 @@ def get_analytics(df: pd.DataFrame):
         plt.figure(figsize=(14, 7))
         # Ensure 'arrival_date_month' is categorical for correct sorting
         month_order = ["January", "February", "March", "April", "May", "June",
-                       "July", "August", "September", "October", "November", "December"]
+                        "July", "August", "September", "October", "November", "December"]
         # Use try-except for categorical conversion as it might fail if column has unexpected values
         try:
             df['arrival_date_month'] = pd.Categorical(df['arrival_date_month'], categories=month_order, ordered=True)
@@ -258,10 +270,10 @@ def get_analytics(df: pd.DataFrame):
             plt.tight_layout()
             plt.show(block=False)
         except Exception as e:
-             print(f"Skipping 'Bookings Over Time' plot due to error: {e}")
+            print(f"Skipping 'Bookings Over Time' plot due to error: {e}")
 
     else:
-         print("Skipping 'Bookings Over Time' plot: Required date columns missing.")
+        print("Skipping 'Bookings Over Time' plot: Required date columns missing.")
 
 
     # --- Figure 3: Cancellation Rate by Hotel Type ---
@@ -306,7 +318,7 @@ def get_analytics(df: pd.DataFrame):
                 plt.tight_layout()
                 plt.show(block=False)
             else:
-                 print("Skipping 'Top Countries' plot: No valid country data found after normalization.")
+                print("Skipping 'Top Countries' plot: No valid country data found after normalization.")
             # Don't drop country_normalized if db_operations needs it, maybe drop later
             # df.drop(columns=['country_normalized'], inplace=True)
         except Exception as e:
@@ -364,7 +376,7 @@ def ask_question(
     llama_pipeline, # Add type hint if possible (e.g., transformers.Pipeline)
     max_context_docs: int = 5,
     max_tokens: int = 250 # Increased default max tokens
-    ) -> str:
+) -> str:
     """
     Answers a question using precomputed analytics or RAG fallback.
     """
@@ -400,7 +412,7 @@ def ask_question(
 
         # Highest Cancellations by Location (Top 5)
         elif "highest booking cancellations" in query_lower and ("location" in query_lower or "country" in query_lower):
-             # Query the precomputed, sorted table
+            # Query the precomputed, sorted table
             sql = "SELECT location, cancellations FROM cancellation_insights ORDER BY cancellations DESC LIMIT 5"
             results = fetch_all_results(cursor, sql)
             if results:
@@ -418,7 +430,7 @@ def ask_question(
 
         # Top Dates with Most Cancellations (Top 5)
         elif "most cancellations" in query_lower and ("date" in query_lower or "when" in query_lower):
-             # Query the precomputed, sorted table
+            # Query the precomputed, sorted table
             sql = "SELECT date, count FROM cancellation_by_date ORDER BY count DESC LIMIT 5"
             results = fetch_all_results(cursor, sql)
             if results:
@@ -432,7 +444,7 @@ def ask_question(
             date_match = re.search(r"(\d{4}-\d{2}-\d{2})", query) # Assumes YYYY-MM-DD format
             if date_match:
                 specific_date = date_match.group(1)
-                 # Query the precomputed table
+                # Query the precomputed table
                 sql = "SELECT count FROM cancellation_by_date WHERE date = ?"
                 result = fetch_one_result(cursor, sql, (specific_date,))
                 answer = f"{result[0]} bookings were canceled on {specific_date}." if result else f"No cancellation data found for the specific date {specific_date}."
@@ -441,7 +453,7 @@ def ask_question(
 
         # Most Bookings by Country (Top 5)
         elif "most bookings" in query_lower and "country" in query_lower:
-             # Query the precomputed table
+            # Query the precomputed table
             sql = "SELECT country, count FROM top_booking_countries ORDER BY count DESC LIMIT 5"
             results = fetch_all_results(cursor, sql)
             if results:
@@ -463,9 +475,9 @@ def ask_question(
             if isinstance(retrieved_indices, tuple): # faiss often returns (distances, indices)
                 context_indices = retrieved_indices[1][0] # Get indices from the first query result
             elif isinstance(retrieved_indices, list) and len(retrieved_indices) > 0 and isinstance(retrieved_indices[0], list):
-                 context_indices = retrieved_indices[0] # Handle case where it might return list of lists
+                context_indices = retrieved_indices[0] # Handle case where it might return list of lists
             else:
-                 context_indices = retrieved_indices # Assume it's already a list of indices
+                context_indices = retrieved_indices # Assume it's already a list of indices
 
 
             valid_indices = [int(idx) for idx in context_indices if 0 <= int(idx) < len(texts)] # Convert to int

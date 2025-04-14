@@ -52,9 +52,6 @@ FORCE_RECOMPUTE_ANALYTICS = os.getenv("FORCE_RECOMPUTE_ANALYTICS", "false").lowe
 FORCE_RECOMPUTE_EMBEDDINGS = os.getenv("FORCE_RECOMPUTE_EMBEDDINGS", "false").lower() == "true"
 FORCE_RECREATE_INDEX = os.getenv("FORCE_RECREATE_INDEX", "false").lower() == "true"
 
-# --- Application State ---
-app_state = {}
-
 # --- Lifespan Context Manager (EDITED DATA LOADING) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -146,7 +143,7 @@ async def lifespan(app: FastAPI):
     print("Generating text representations for RAG...")
     try:
         texts = df.apply(row_to_text, axis=1).tolist()
-        app_state["texts"] = texts
+        app.state.texts = texts # Store in app.state
         print(f"Generated {len(texts)} text representations.")
     except Exception as e:
         print(f"FATAL error generating texts: {e}")
@@ -166,7 +163,7 @@ async def lifespan(app: FastAPI):
     print("Creating/Loading FAISS index...")
     try:
         faiss_index = create_or_load_faiss_index(embeddings, force_recreate=FORCE_RECREATE_INDEX)
-        app_state["faiss_index"] = faiss_index
+        app.state.faiss_index = faiss_index # Store in app.state
         print(f"FAISS index ready. Index size: {faiss_index.ntotal}")
         del embeddings # Free memory
     except Exception as e:
@@ -179,17 +176,21 @@ async def lifespan(app: FastAPI):
     print(f"Using device: {device}")
     try:
         embedder = SentenceTransformer(EMBEDDING_MODEL, device=device)
-        app_state["embedder"] = embedder
+        app.state.embedder = embedder # Store in app.state
+        print("Embedder loaded successfully.")
 
         tokenizer = AutoTokenizer.from_pretrained(LLM_MODEL)
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
+        print("Tokenizer loaded successfully.")
 
-        # Consider adding error handling or retries for model download/loading
         llama_model = AutoModelForCausalLM.from_pretrained(LLM_MODEL, device_map="auto", torch_dtype=torch.float16)
+        print("Llama model loaded successfully.")
+
         llama_pipeline = pipeline("text-generation", model=llama_model, tokenizer=tokenizer, device_map="auto")
-        app_state["llama_pipeline"] = llama_pipeline
-        app_state["db_path"] = DB_PATH # Store db path
+        app.state.llama_pipeline = llama_pipeline # Store in app.state
+        print("Llama pipeline created and stored in app.state.")
+        app.state.db_path = DB_PATH # Store db path
 
     except Exception as e:
         print(f"FATAL Error loading models: {e}")
@@ -203,7 +204,7 @@ async def lifespan(app: FastAPI):
 
     # Shutdown - Clean up resources
     print("--- Starting Application Shutdown ---")
-    app_state.clear()
+    app.state.clear()
     if torch.cuda.is_available():
         print("Clearing GPU memory...")
         torch.cuda.empty_cache()
@@ -234,7 +235,8 @@ async def ask_api(q: Query, request: Request):
     """Handles user questions, uses precomputed insights or RAG."""
     # Use request.app.state if accessing within endpoint
     state = request.app.state
-    if not state or getattr(state, "llama_pipeline", None) is None: # Check if attribute exists
+    print(f"App State in /ask: {state._state.keys()}") # CORRECTED PRINT STATEMENT
+    if not state or not hasattr(state, "llama_pipeline") or state.llama_pipeline is None: # Check if attribute exists
          raise HTTPException(status_code=503, detail="Resources not initialized yet. Please wait and retry.")
 
     question = q.question
@@ -244,11 +246,11 @@ async def ask_api(q: Query, request: Request):
         # Call the refactored ask_question function with resources from app_state
         answer = ask_question(
             query=question,
-            db_path=state["db_path"],
-            texts=state["texts"],
-            embedder=state["embedder"],
-            faiss_index=state["faiss_index"],
-            llama_pipeline=state["llama_pipeline"]
+            db_path=state.db_path,
+            texts=state.texts,
+            embedder=state.embedder,
+            faiss_index=state.faiss_index,
+            llama_pipeline=state.llama_pipeline
             # Add other params like max_tokens if needed
         )
         return {"answer": answer}
@@ -266,11 +268,12 @@ async def ask_api(q: Query, request: Request):
 async def get_analytics_api(request: Request):
     """Provides pre-calculated analytics data in JSON format."""
     state = request.app.state
-    if not state or "db_path" not in state.__dict__:
+    print(f"App State in /analytics: {state._state.keys()}") # CORRECTED PRINT STATEMENT
+    if not state or not hasattr(state, "db_path") or state.db_path is None:
          raise HTTPException(status_code=503, detail="Resources not initialized yet or DB path missing.")
 
     print("Fetching analytics data...")
-    db_path = state.get("db_path")
+    db_path = state.db_path
 
     conn = None # Initialize conn to None
     try:
