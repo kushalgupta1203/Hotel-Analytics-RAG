@@ -1,19 +1,19 @@
+import sqlite3
 import pandas as pd
 import json
 
 # === Load Country Mapping ===
-def load_country_mapping(path="D:\Projects\Hotel-Analytics-RAG\pipeline\country_mapping.json"):
+def load_country_mapping(path="D:/Projects/Hotel-Analytics-RAG/pipeline/country_mapping.json"):
     with open(path, 'r') as f:
         return json.load(f)
 
 country_map = load_country_mapping()
 
-# === Utility Functions ===
 def safe(x):
     return str(x) if pd.notnull(x) else "unknown"
 
 def normalize_country_code(country_code):
-    return country_map.get(country_code, country_code)  # Return full country name or code if not in map
+    return country_map.get(country_code, country_code)
 
 def row_to_text(row):
     return (
@@ -44,3 +44,11 @@ def row_to_text(row):
         f"Arrival date: {safe(row['arrival_date'])}. "
         f"Revenue: {safe(row['revenue'])}."
     )
+
+def get_db_connection(db_path="D:/Projects/Hotel-Analytics-RAG/analytics.db"):
+    conn = sqlite3.connect(db_path)
+    return conn
+
+def fetch_all_results(cursor, query):
+    cursor.execute(query)
+    return cursor.fetchall()

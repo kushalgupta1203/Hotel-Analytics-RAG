@@ -2,7 +2,7 @@ import os
 import faiss
 import numpy as np
 
-def create_or_load_faiss_index(embeddings, index_path="D:\Projects\Hotel-Analytics-RAG\pipeline\hotel_faiss.index"):
+def create_or_load_faiss_index(embeddings, index_path="D:/Projects/Hotel-Analytics-RAG/pipeline/hotel_faiss.index"):
     if os.path.exists(index_path):
         index = faiss.read_index(index_path)
         print("Loaded FAISS index from cache.")

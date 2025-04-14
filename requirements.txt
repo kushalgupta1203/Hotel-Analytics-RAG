@@ -18,3 +18,4 @@ huggingface_hub
 fastapi
 uvicorn
 pydantic
+sqlite3
