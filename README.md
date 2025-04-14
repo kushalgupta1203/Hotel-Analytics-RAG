@@ -96,6 +96,10 @@ Hotel-Analytics-RAG/
 │   ├── sources.txt          # Documentation on data sources
 │   └── details.txt          # Field explanations and metadata
 │
+├── evaluation/              # Outcomes of the project
+│   ├── outcomes/            # Images of working module
+│   └── *.txt                # Details about report and challenges faced
+│
 ├── preprocessing/           # Data preparation
 │   ├── preprocess.ipynb     # Data cleaning and transformation notebook
 │   └── backup.csv           # Backup of preprocessed data
