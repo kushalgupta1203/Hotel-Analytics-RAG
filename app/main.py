@@ -29,7 +29,7 @@ try:
         get_db_connection, fetch_all_results, fetch_one_result, row_to_text, normalize_country_code,
         DEFAULT_DB_PATH, DEFAULT_COUNTRY_MAPPING_PATH
     )
-    from pipeline.utils import ask_question
+    from pipeline.main import ask_question
     from pipeline.db_operations import generate_and_store_analytics
     from pipeline.embeddings import generate_or_load_embeddings
     from pipeline.faiss_index import create_or_load_faiss_index
@@ -234,7 +234,7 @@ async def ask_api(q: Query, request: Request):
     """Handles user questions, uses precomputed insights or RAG."""
     # Use request.app.state if accessing within endpoint
     state = request.app.state
-    if not state or "llama_pipeline" not in state: # Check if state is populated
+    if not state or getattr(state, "llama_pipeline", None) is None: # Check if attribute exists
          raise HTTPException(status_code=503, detail="Resources not initialized yet. Please wait and retry.")
 
     question = q.question
@@ -266,7 +266,7 @@ async def ask_api(q: Query, request: Request):
 async def get_analytics_api(request: Request):
     """Provides pre-calculated analytics data in JSON format."""
     state = request.app.state
-    if not state or "db_path" not in state:
+    if not state or "db_path" not in state.__dict__:
          raise HTTPException(status_code=503, detail="Resources not initialized yet or DB path missing.")
 
     print("Fetching analytics data...")
