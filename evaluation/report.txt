@@ -1,0 +1,62 @@
+# Project Summary: Hotel Booking Analytics & RAG System
+
+
+
+1. Objective
+  
+To develop a system that processes hotel booking data to:
+- Extract meaningful analytics such as revenue trends, cancellation patterns, and geographical trends.
+- Enable Retrieval-Augmented Generation (RAG) for answering user queries using natural language.
+
+
+
+2. Dataset & Preprocessing 
+ 
+- Merged two publicly available hotel booking datasets.  
+- Details of dataset sources and structure are available in "dataset/details.txt".  
+- Preprocessing included handling missing values, correcting inconsistencies, and creating new columns to enhance analytics and query performance.  
+- Cleaned data was saved for use in both analytics and embedding generation.
+
+
+
+3. Analytics & Reporting  
+
+Implemented analytics using Python libraries like pandas, matplotlib, and seaborn:  
+- Revenue trends over time (monthly and yearly).  
+- Cancellation rate as a percentage of total bookings.  
+- Geographical distribution of bookings by country.  
+- Lead time (number of days before booking) distribution.  
+- Additional insights on customer types, bookings by agent/company, seasonal trends, and stay durations.  
+- A Streamlit dashboard was created to visualize and explore the data interactively.
+
+
+
+4. Retrieval-Augmented Generation (RAG)
+  
+- Used FAISS for vector storage ("hotel_faiss.index").  
+- Used LLaMA-2-7B-chat model from Hugging Face Transformers for answer generation.  
+- Embeddings were generated using a Hugging Face embedding model and saved using Pickle ("embeddings.pkl").  
+- The RAG system retrieves top relevant vectors and uses the LLM to answer questions based on the retrieved context.
+
+
+
+5. API Development  
+
+Developed a REST API using FastAPI with the following endpoints:  
+- POST /analytics: Returns analytics reports in structured form.  
+- POST /ask: Accepts natural language queries and returns booking-related answers using the RAG pipeline.  
+- Included a basic HTML template inside the "templates" folder for browser-based interaction.
+
+
+
+6. Performance Evaluation  
+
+- Evaluated accuracy of Q&A system using sample queries and expected answers manually.  
+- Measured API response time and optimized vector retrieval speed.
+
+
+
+7. Deployment & Submission  
+
+- Codebase is modular and organized into "app", "pipeline", "dataset", and "templates" folders.  
+- A README file includes setup instructions, test queries, and an explanation of the implementation choices and challenges.

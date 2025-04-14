@@ -1,0 +1,26 @@
+# Challenges Faced
+
+
+
+1. Main Model and Query Response Pipeline 
+
+   The most difficult and ongoing challenge is forming the complete working pipeline: generating embeddings, storing and retrieving vectors, and accurately answering queries using the model. The functions in `utils.py` are complex and have not yet stabilized for all elements in the database.
+
+
+
+2. Vector Store Implementation
+
+   Initially tried using ChromaDB but faced compatibility and technical issues. After switching to FAISS, it worked more reliably, but the transition required substantial changes in embedding storage and retrieval logic.
+
+
+
+3. Understanding Dataset Columns
+
+   Interpreting the dataset column headers took considerable time due to inconsistent naming and unclear data types. Once the columns were mapped correctly, the dataset merging was straightforward.
+
+
+
+4. Hugging Face Token Integration  
+
+   Integrating the Hugging Face model and setting up the token took time. Proper handling of authentication, managing rate limits, and ensuring optimal memory usage were crucial for smooth functionality.
+
